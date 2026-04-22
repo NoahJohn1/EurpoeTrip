@@ -3,9 +3,15 @@ import { SEED_DATA, TripData } from './seed';
 
 const BLOB_PATHNAME = 'trip-data.json';
 
+function hasBlobToken(): boolean {
+  return Object.keys(process.env).some(
+    (k) => k === 'BLOB_READ_WRITE_TOKEN' || k.endsWith('_READ_WRITE_TOKEN')
+  );
+}
+
 export async function getTripData(): Promise<TripData> {
   try {
-    if (!process.env.BLOB_READ_WRITE_TOKEN) return SEED_DATA;
+    if (!hasBlobToken()) return SEED_DATA;
 
     const { blobs } = await list({ prefix: BLOB_PATHNAME });
     if (!blobs.length) return SEED_DATA;
