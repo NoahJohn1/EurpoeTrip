@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bryan & Noah — London + Paris, May 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -44,35 +43,164 @@
     --booking-bg: #F4F4FB;
   }
 
+  /* clip prevents horizontal scroll without creating a scroll container (so sticky still works) */
+  html, body { overflow-x: clip; }
+
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg);
     color: var(--text);
     font-size: 14px;
     line-height: 1.6;
-    padding: 40px 24px 60px;
-    max-width: 820px;
-    margin: 0 auto;
+    padding-top: 0;
   }
 
-  /* Header */
-  .trip-header {
-    margin-bottom: 36px;
-    padding-bottom: 24px;
+  /* Prevent long text from blowing out layout */
+  .activity-text, .booking-strip, .note, .note-box,
+  .book-detail, .book-name, .day-title {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* ── Dark Mode ── */
+  [data-theme="dark"] {
+    --bg: #18181A;
+    --card: #222224;
+    --text: #E4E3DF;
+    --muted: #9A9994;
+    --border: rgba(255,255,255,0.09);
+
+    --london: #1A3352;
+    --london-text: #7BBDE8;
+    --paris: #282060;
+    --paris-text: #AAA4F4;
+    --travel: #1A2E0E;
+    --travel-text: #7EBD52;
+    --rest: #28261E;
+    --rest-text: #B2AFA6;
+
+    --tag-ticket: #3A1810;
+    --tag-ticket-text: #F0886C;
+    --tag-free: #162410;
+    --tag-free-text: #80C454;
+    --tag-transit: #0E2440;
+    --tag-transit-text: #72B0F0;
+    --tag-tip: #28261E;
+    --tag-tip-text: #B2AFA6;
+    --tag-flame: #2E1A08;
+    --tag-flame-text: #F0A84C;
+    --tag-confirm: #201A4A;
+    --tag-confirm-text: #AAA4F4;
+    --tag-manga: #3A1422;
+    --tag-manga-text: #F096B8;
+
+    --booking-border: #7B72E0;
+    --booking-bg: #1E1A3A;
+  }
+  [data-theme="dark"] .top-nav {
+    background: #1C1C1E;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] .tab-btn.active {
+    border-bottom-color: #E4E3DF;
+  }
+  [data-theme="dark"] .legend-dot {
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* ── Top Navbar ── */
+  .top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
     border-bottom: 1.5px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
-  .trip-header h1 {
+  .nav-header {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 14px 24px 0;
+  }
+  .nav-header h1 {
     font-family: 'DM Serif Display', serif;
-    font-size: 32px;
+    font-size: 22px;
     font-weight: 400;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.3px;
     color: var(--text);
-    margin-bottom: 4px;
   }
-  .trip-header .subtitle {
-    font-size: 14px;
+  .nav-header .subtitle {
+    font-size: 12px;
     color: var(--muted);
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: stretch;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .tab-bar {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex: 1;
+    padding: 0 8px;
+    gap: 2px;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+
+  .theme-toggle {
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0 14px;
+    font-size: 16px;
+    color: var(--muted);
+    border-left: 1px solid var(--border);
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+  }
+  .theme-toggle:hover { color: var(--text); }
+
+  .tab-btn {
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 8px 14px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 2.5px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--text);
+    border-bottom-color: #1A1A18;
+    font-weight: 600;
+  }
+  .tab-btn .tab-date {
+    display: block;
+    font-size: 10px;
+    font-weight: 500;
+    color: inherit;
+    opacity: 0.7;
+  }
+
+  /* ── Page Content ── */
+  .page-content {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
   }
 
   /* Legend */
@@ -80,7 +208,11 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px 20px;
-    margin-top: 16px;
+    margin-bottom: 24px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
   }
   .legend-item {
     display: flex;
@@ -96,6 +228,10 @@
     flex-shrink: 0;
   }
 
+  /* Day panel */
+  .day-panel { display: none; }
+  .day-panel.active { display: block; }
+
   /* Section label */
   .section-label {
     font-size: 11px;
@@ -103,7 +239,7 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--muted);
-    margin: 28px 0 8px;
+    margin: 0 0 10px;
   }
 
   /* Day card */
@@ -226,382 +362,7 @@
   }
   .note-box strong { color: var(--text); }
 
-  /* Print */
-  @media print {
-    body { background: white; padding: 20px; }
-    .day-card { break-inside: avoid; }
-  }
-</style>
-</head>
-<body>
-
-<div class="trip-header">
-  <h1>Bryan &amp; Noah — London + Paris</h1>
-  <div class="subtitle">May 19–26, 2026 &nbsp;·&nbsp; Chicago ORD → London LHR → Paris CDG → Chicago ORD</div>
-
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#D85A30;"></div>Pre-book tickets</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#639922;"></div>Free / walk-in</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#185FA5;"></div>Transit</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#5F5E5A;"></div>Tip</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#BA7517;"></div>Don't miss</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#534AB7;"></div>Confirmed booking</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#D4537E;"></div>Manga / comics</div>
-  </div>
-</div>
-
-<!-- TUESDAY MAY 19 -->
-<div class="section-label">Tuesday, May 19 — Departure day (Chicago)</div>
-<div class="day-card">
-  <div class="day-header">
-    <span class="day-badge badge-travel">Travel</span>
-    <span class="day-title">Fly Chicago ORD → London Heathrow</span>
-  </div>
-  <ul class="activity-list">
-    <li><span class="time">Afternoon</span><span class="activity-text">Get to O'Hare — check in, clear security</span><span class="tag tag-tip">Arrive 3 hrs early for international</span></li>
-    <li><span class="time">6:31 PM</span><span class="activity-text">DL 4923 departs ORD → JFK (Endeavor / Delta Connection)</span></li>
-    <li><span class="time">~9:00 PM</span><span class="activity-text">Connect at JFK — 1h 40m layover</span></li>
-    <li><span class="time">~10:40 PM</span><span class="activity-text">DL 5988 departs JFK → LHR (Virgin Atlantic A330-900neo)</span></li>
-  </ul>
-  <div class="booking-strip">Delta · ORD→LHR · Basic Economy · Carry-on only (no free checked bags)</div>
-</div>
-
-<!-- WEDNESDAY MAY 20 -->
-<div class="section-label">Wednesday, May 20 — Arrive London</div>
-<div class="day-card">
-  <div class="day-header">
-    <span class="day-badge badge-travel">Arrive</span>
-    <span class="day-title">Land at Heathrow, check in, get oriented</span>
-    <span class="day-hotel">Premier Inn Aldgate</span>
-  </div>
-  <ul class="activity-list">
-    <li><span class="time">12:05 PM</span><span class="activity-text">Land at London Heathrow (LHR)</span></li>
-    <div class="note">Clear UK Border Control — can take 30–60 min. Have passports and hotel address ready.</div>
-    <li><span class="time">1:30 PM</span><span class="activity-text">Elizabeth line from Heathrow toward central London</span><span class="tag tag-transit">~50 min to Liverpool St</span></li>
-    <li><span class="time">2:30 PM</span><span class="activity-text">Check in to Premier Inn London City – Aldgate, drop bags, freshen up</span></li>
-    <div class="note">If room isn't ready, hotel will hold luggage — head out and come back.</div>
-    <li><span class="time">3:30 PM</span><span class="activity-text">Easy walk around Aldgate / Whitechapel — get your bearings</span><span class="tag tag-free">Free</span></li>
-    <li><span class="time">5:00 PM</span><span class="activity-text">Short walk to Tower Bridge — first London landmark</span><span class="tag tag-free">Free</span></li>
-    <li><span class="time">7:00 PM</span><span class="activity-text">Dinner nearby — Spitalfields or Brick Lane</span></li>
-    <li><span class="time">9:00 PM</span><span class="activity-text">Early night — you've been up for 24+ hours</span></li>
-  </ul>
-</div>
-
-<!-- THURSDAY MAY 21 -->
-<div class="section-label">Thursday, May 21 — Local exploring &amp; concert night</div>
-<div class="day-card">
-  <div class="day-header">
-    <span class="day-badge badge-london">London</span>
-    <span class="day-title">Tower of London, Sky Garden &amp; OVO Arena Wembley (doors 6:30 PM)</span>
-    <span class="day-hotel">Premier Inn Aldgate</span>
-  </div>
-  <ul class="activity-list">
-    <li><span class="time">9:30 AM</span><span class="activity-text">Breakfast near hotel — everything today is walkable from Aldgate</span></li>
-    <li><span class="time">10:00 AM</span><span class="activity-text">Tower of London — Crown Jewels, Beefeaters, medieval fortress</span><span class="tag tag-ticket">Pre-book — ~£35/person</span></li>
-    <div class="note">Allow 2–2.5 hrs. One of the most visited sites in England — book in advance to skip the queue.</div>
-    <li><span class="time">12:30 PM</span><span class="activity-text">Tower Bridge — walk across &amp; photos (5-min walk from the Tower)</span><span class="tag tag-free">Free to cross</span></li>
-    <div class="note">The Tower Bridge Exhibition (glass floor walkway) is £12/person — optional but impressive if you want it.</div>
-    <li><span class="time">1:00 PM</span><span class="activity-text">Lunch near the Tower — St Katharine Docks or Monument area</span></li>
-    <li><span class="time">2:30 PM</span><span class="activity-text">Sky Garden, 20 Fenchurch St — 360° views over the City of London</span><span class="tag tag-ticket">Free — must pre-book online</span></li>
-    <div class="note">Allow 1–1.5 hrs. 20-min walk from the Tower. Book ASAP — slots fill weeks ahead.</div>
-    <li><span class="time">4:15 PM</span><span class="activity-text">Walk back to hotel — 10 min from Sky Garden</span><span class="tag tag-transit">Straight walk back to Aldgate</span></li>
-    <li><span class="time">4:30 PM</span><span class="activity-text">Freshen up, grab a light snack before the show</span></li>
-    <div class="note">Don't eat a big meal — grab something at Wembley instead.</div>
-    <li><span class="time">5:00 PM</span><span class="activity-text">Leave hotel — walk to Aldgate East tube</span></li>
-    <li><span class="time">5:15 PM</span><span class="activity-text">Jubilee line toward Wembley Park</span><span class="tag tag-transit">Change at Canning Town or Stratford — ~45 min</span></li>
-    <div class="note">First time on the tube — allow the extra time. Google Maps works great underground.</div>
-    <li><span class="time">6:00 PM</span><span class="activity-text">Arrive Wembley Park station — follow the crowd down Olympic Way</span></li>
-    <li><span class="time">6:15 PM</span><span class="activity-text">Arrive OVO Arena — grab food &amp; drinks before doors open</span></li>
-    <li><span class="time">6:30 PM</span><span class="activity-text">🎵 Doors open — get inside, find your seats</span></li>
-    <li><span class="time">~10:30 PM</span><span class="activity-text">Concert ends — Jubilee line back toward central London</span></li>
-    <div class="note">Platforms will be packed. Be patient, let a train or two go if needed. Back at hotel ~midnight.</div>
-  </ul>
-</div>
-
-<!-- FRIDAY MAY 22 -->
-<div class="section-label">Friday, May 22 — Full sightseeing day</div>
-<div class="day-card">
-  <div class="day-header">
-    <span class="day-badge badge-london">London</span>
-    <span class="day-title">Buckingham Palace, Westminster &amp; Borough Market</span>
-    <span class="day-hotel">Premier Inn Aldgate</span>
-  </div>
-  <ul class="activity-list">
-    <li><span class="time">8:00 AM</span><span class="activity-text">Breakfast near hotel — early start to catch the Changing of the Guard</span></li>
-    <li><span class="time">8:45 AM</span><span class="activity-text">Tube to Green Park station</span><span class="tag tag-transit">Circle → Victoria line, ~25 min</span></li>
-    <li><span class="time">9:30 AM</span><span class="activity-text">Arrive Buckingham Palace — stake out a spot at the Victoria Memorial railings</span><span class="tag tag-free">Free</span></li>
-    <div class="note">Crowds build fast. Arrive by 9:45 AM at the latest for a clear view of the forecourt.</div>
-    <li><span class="time">10:45 AM</span><span class="activity-text">🎖️ Changing of the Guard ceremony — the full ~45 min performance</span><span class="tag tag-flame">Don't miss — check changing-guard.com to confirm date</span></li>
-    <li><span class="time">11:30 AM</span><span class="activity-text">Walk around the Palace gates &amp; Victoria Memorial — photos</span><span class="tag tag-free">Free</span></li>
-    <li><span class="time">12:00 PM</span><span class="activity-text">Stroll through St James's Park toward Westminster</span><span class="tag tag-free">~15 min walk</span></li>
-    <li><span class="time">12:15 PM</span><span class="activity-text">Jubilee line from Westminster → London Bridge</span><span class="tag tag-transit">~5 min, 2 stops</span></li>
-    <li><span class="time">12:30 PM</span><span class="activity-text">Borough Market — leisurely lunch &amp; browse the stalls</span><span class="tag tag-free">Walk-in — peak market time</span></li>
-    <div class="note">2 full hours here. Iconic London food market — eat your way through it.</div>
-    <li><span class="time">2:30 PM</span><span class="activity-text">Walk across London Bridge or tube back to Westminster</span><span class="tag tag-transit">~15 min walk over the bridge</span></li>
-    <li><span class="time">2:45 PM</span><span class="activity-text">Westminster Abbey — timed entry</span><span class="tag tag-ticket">Pre-book 2:45 PM slot — £31/person</span></li>
-    <div class="note">Last admission is 3:30 PM on Fridays. Plan 1.5 hrs with the included audio guide.</div>
-    <li><span class="time">4:30 PM</span><span class="activity-text">Big Ben &amp; Houses of Parliament — exterior walk &amp; photos</span><span class="tag tag-free">Free</span></li>
-    <li><span class="time">4:45 PM</span><span class="activity-text">Board HOHO Red Route at Westminster stop</span><span class="tag tag-ticket">Buy 48h HOHO ticket online (valid Sat too)</span></li>
-    <li><span class="time">5:00 PM</span><span class="activity-text">Hop off at London Eye — photos from South Bank</span><span class="tag tag-free">Free</span></li>
-    <li><span class="time">5:30 PM</span><span class="activity-text">Hop back on HOHO or tube toward hotel — freshen up</span></li>
-    <li><span class="time">7:00 PM</span><span class="activity-text">Dinner out — nice meal before the big museum day tomorrow</span></li>
-  </ul>
-</div>
-
-<!-- SATURDAY MAY 23 -->
-<div class="section-label">Saturday, May 23 — Full London sightseeing day</div>
-<div class="day-card">
-  <div class="day-header">
-    <span class="day-badge badge-london">London</span>
-    <span class="day-title">British Museum, Natural History Museum &amp; Thames cruise</span>
-    <span class="day-hotel">Premier Inn Aldgate</span>
-  </div>
-  <ul class="activity-list">
-    <li><span class="time">9:30 AM</span><span class="activity-text">Late start — you were out past midnight. Breakfast near hotel.</span></li>
-    <li><span class="time">10:30 AM</span><span class="activity-text">HOHO Green Route to British Museum</span><span class="tag tag-confirm">Day 2 of 48h HOHO ticket</span></li>
-    <li><span class="time">11:00 AM</span><span class="activity-text">British Museum — Rosetta Stone, Egyptian mummies, Greek antiquities</span><span class="tag tag-free">Free — timed entry recommended</span></li>
-    <div class="note">Allow 1.5–2 hrs for highlights. Could easily fill a whole day.</div>
-    <li><span class="time">1:00 PM</span><span class="activity-text">Forbidden Planet, 179 Shaftesbury Ave — comics, anime, collectibles</span><span class="tag tag-manga">~15 min walk from museum</span></li>
-    <li><span class="time">2:00 PM</span><span class="activity-text">Lunch in Covent Garden</span></li>
-    <li><span class="time">3:15 PM</span><span class="activity-text">HOHO Blue Route → Natural History Museum</span><span class="tag tag-transit">~30 min ride</span></li>
-    <li><span class="time">3:45 PM</span><span class="activity-text">Natural History Museum — dinosaurs, blue whale, Darwin Centre</span><span class="tag tag-free">Free — closes 5:50 PM</span></li>
-    <div class="note">Allow 1.5 hrs. Keep an eye on closing time.</div>
-    <li><span class="time">5:30 PM</span><span class="activity-text">HOHO Red Route back toward Westminster / South Bank</span></li>
-    <li><span class="time">6:15 PM</span><span class="activity-text">Thames River Cruise — Westminster Pier to Tower Pier</span><span class="tag tag-free">Included with 48h HOHO</span></li>
-    <div class="note">~30-min cruise. Views of St Paul's, Tate Modern, Tower Bridge. Last boat ~7 PM — don't miss it.</div>
-    <li><span class="time">7:00 PM</span><span class="activity-text">Arrive Tower Pier — 10-min walk back to hotel</span></li>
-    <li><span class="time">7:30 PM</span><span class="activity-text">Last London dinner — make it a good pub meal</span></li>
-  </ul>
-</div>
-
-<!-- LONDON MAP -->
-<div class="section-label">London — All Stops on a Map</div>
-<div class="day-card" style="padding: 0; overflow: hidden;">
-  <div id="london-map" style="height: 500px; border-radius: 12px;"></div>
-</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-  const map = L.map('london-map');
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 20
-  }).addTo(map);
-
-  const dayColors = {
-    "Hotel": "#0C447C",
-    "Wed May 20": "#2196F3",
-    "Thu May 21": "#FF9800",
-    "Fri May 22": "#4CAF50",
-    "Sat May 23": "#9C27B0"
-  };
-
-  const places = [
-    { name: "🏨 Premier Inn Aldgate (Hotel)", lat: 51.5134, lng: -0.0711, day: "Hotel" },
-    { name: "Brick Lane / Spitalfields", lat: 51.5225, lng: -0.0708, day: "Wed May 20" },
-    { name: "Tower of London", lat: 51.5081, lng: -0.0759, day: "Thu May 21" },
-    { name: "Tower Bridge", lat: 51.5055, lng: -0.0754, day: "Thu May 21" },
-    { name: "Sky Garden (20 Fenchurch St)", lat: 51.5114, lng: -0.0834, day: "Thu May 21" },
-    { name: "OVO Arena Wembley", lat: 51.5590, lng: -0.2796, day: "Thu May 21" },
-    { name: "Westminster Abbey", lat: 51.4994, lng: -0.1273, day: "Fri May 22" },
-    { name: "Big Ben & Houses of Parliament", lat: 51.5001, lng: -0.1245, day: "Fri May 22" },
-    { name: "Buckingham Palace", lat: 51.5014, lng: -0.1419, day: "Fri May 22" },
-    { name: "London Eye", lat: 51.5033, lng: -0.1196, day: "Fri May 22" },
-    { name: "Borough Market", lat: 51.5055, lng: -0.0909, day: "Fri May 22" },
-    { name: "British Museum", lat: 51.5194, lng: -0.1270, day: "Sat May 23" },
-    { name: "Forbidden Planet (179 Shaftesbury Ave)", lat: 51.5147, lng: -0.1253, day: "Sat May 23" },
-    { name: "Covent Garden", lat: 51.5117, lng: -0.1240, day: "Sat May 23" },
-    { name: "Natural History Museum", lat: 51.4967, lng: -0.1764, day: "Sat May 23" },
-    { name: "Westminster Pier (Thames Cruise start)", lat: 51.5014, lng: -0.1234, day: "Sat May 23" },
-    { name: "Tower Pier (Thames Cruise end)", lat: 51.5064, lng: -0.0776, day: "Sat May 23" }
-  ];
-
-  function makeIcon(color, isHotel) {
-    const size = isHotel ? 20 : 14;
-    const inner = isHotel ? '<span style="font-size:11px;line-height:1;color:white;">★</span>' : '';
-    return L.divIcon({
-      html: `<div style="width:${size}px;height:${size}px;background:${color};border-radius:50%;border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;">${inner}</div>`,
-      className: '',
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2],
-      popupAnchor: [0, -(size / 2)]
-    });
-  }
-
-  const bounds = [];
-  places.forEach(p => {
-    const color = dayColors[p.day];
-    const isHotel = p.day === 'Hotel';
-    const marker = L.marker([p.lat, p.lng], { icon: makeIcon(color, isHotel) }).addTo(map);
-    marker.bindPopup(`<strong style="font-size:13px;">${p.name}</strong><br><span style="font-size:11px;color:#666;">${p.day}</span>`);
-    bounds.push([p.lat, p.lng]);
-  });
-
-  map.fitBounds(bounds, { padding: [28, 28] });
-
-  const legend = L.control({ position: 'bottomright' });
-  legend.onAdd = function () {
-    const div = L.DomUtil.create('div');
-    div.style.cssText = 'background:white;padding:8px 12px;border-radius:8px;box-shadow:0 1px 6px rgba(0,0,0,0.2);font-size:11px;font-family:"DM Sans",sans-serif;line-height:2;';
-    div.innerHTML = Object.entries(dayColors).map(([day, color]) =>
-      `<div style="display:flex;align-items:center;gap:7px;"><span style="display:inline-block;width:10px;height:10px;background:${color};border-radius:50%;flex-shrink:0;"></span>${day === 'Hotel' ? '★ Hotel' : day}</div>`
-    ).join('');
-    return div;
-  };
-  legend.addTo(map);
-</script>
-
-<!-- SUNDAY MAY 24 -->
-<div class="section-label">Sunday, May 24 — Eurostar to Paris</div>
-<div class="day-card">
-  <div class="day-header">
-    <span class="day-badge badge-travel">Travel</span>
-    <span class="day-title">Eurostar + Champs-Élysées &amp; Arc de Triomphe</span>
-    <span class="day-hotel">Airbnb La Garenne-Colombes</span>
-  </div>
-  <ul class="activity-list">
-    <li><span class="time">7:30 AM</span><span class="activity-text">Wake up, pack, check out of Premier Inn</span></li>
-    <li><span class="time">8:00 AM</span><span class="activity-text">Quick breakfast near hotel or grab something at St. Pancras</span></li>
-    <li><span class="time">8:20 AM</span><span class="activity-text">Tube to St. Pancras International</span><span class="tag tag-transit">Circle/Met line ~20 min — aim to arrive by 9:00</span></li>
-    <div class="note">Your ticket says arrive by 9:16 AM. Earlier is better — St. Pancras security and passport control take time.</div>
-    <li><span class="time">9:16 AM</span><span class="activity-text">Arrive St. Pancras — check in, passport control, gate</span></li>
-    <div class="booking-strip">Eurostar ref VXQ2X4 · Train 9018 · Coach 8 · Bryan seat 42 / Noah seat 41 · Departs 10:31 AM</div>
-    <li><span class="time">10:31 AM</span><span class="activity-text">Eurostar departs London St. Pancras</span></li>
-    <li><span class="time">1:59 PM</span><span class="activity-text">Arrive Paris Gare du Nord (Paris time — 1 hr ahead of London)</span></li>
-    <li><span class="time">2:30 PM</span><span class="activity-text">RER A or Metro to La Garenne-Colombes — check in to Airbnb</span><span class="tag tag-transit">~25–35 min from Gare du Nord</span></li>
-    <div class="note">Buy a Navigo Easy card at Gare du Nord — cheapest way to top up Metro/RER tickets for your stay.</div>
-    <li><span class="time">3:30 PM</span><span class="activity-text">Metro Line 1 to Charles-de-Gaulle–Étoile</span></li>
-    <li><span class="time">4:00 PM</span><span class="activity-text">Stroll the full Champs-Élysées toward the Arc de Triomphe</span><span class="tag tag-free">Free — ~35 min walk</span></li>
-    <li><span class="time">5:00 PM</span><span class="activity-text">Arc de Triomphe — underground pedestrian passage, view the carvings &amp; reliefs up close</span><span class="tag tag-free">Free</span></li>
-    <li><span class="time">6:15 PM</span><span class="activity-text">Get a good spot near the Tomb of the Unknown Soldier</span></li>
-    <li><span class="time">6:30 PM</span><span class="activity-text">🔥 Flame rekindling ceremony — Tomb of the Unknown Soldier</span><span class="tag tag-flame">Don't miss — daily since 1923</span></li>
-    <li><span class="time">7:15 PM</span><span class="activity-text">Dinner near Trocadéro or along the Seine — first Paris evening!</span></li>
-  </ul>
-</div>
-
-<!-- MONDAY MAY 25 -->
-<div class="section-label">Monday, May 25 — Full Paris day</div>
-<div class="day-card">
-  <div class="day-header">
-    <span class="day-badge badge-paris">Paris</span>
-    <span class="day-title">Eiffel Tower, Louvre, Notre-Dame &amp; Aaapoum Bapoum</span>
-    <span class="day-hotel">Airbnb La Garenne-Colombes</span>
-  </div>
-  <ul class="activity-list">
-    <li><span class="time">8:00 AM</span><span class="activity-text">Breakfast near the Airbnb — grab a croissant and coffee</span></li>
-    <li><span class="time">8:30 AM</span><span class="activity-text">Metro/RER to Bir-Hakeim or Trocadéro stop</span><span class="tag tag-transit">~25 min from Airbnb area</span></li>
-    <li><span class="time">9:00 AM</span><span class="activity-text">Eiffel Tower — first entry slot of the day</span><span class="tag tag-ticket">Book 60 days out — summit sells out fast</span></li>
-    <div class="note">Allow 1.5–2 hrs. Book a 9:00 or 9:30 AM slot if possible to beat the crowds.</div>
-    <li><span class="time">11:00 AM</span><span class="activity-text">Walk or Metro to the Louvre</span><span class="tag tag-transit">~25 min walk or 2 Metro stops</span></li>
-    <li><span class="time">11:30 AM</span><span class="activity-text">Louvre Museum — Mona Lisa, Venus de Milo, Winged Victory</span><span class="tag tag-ticket">Pre-book timed slot — essential</span></li>
-    <div class="note">Allow 2–2.5 hrs for highlights. Book an 11:30 AM or noon entry slot. The museum is enormous — pick a focus.</div>
-    <li><span class="time">2:00 PM</span><span class="activity-text">Lunch near the Louvre — Rue de Rivoli or Tuileries garden café</span></li>
-    <li><span class="time">3:15 PM</span><span class="activity-text">Metro to Cité stop → Notre-Dame Cathedral</span><span class="tag tag-ticket">Free — reserve time slot online</span></li>
-    <div class="note">Allow 45–60 min inside. Fully restored after the 2019 fire — stunning interior.</div>
-    <li><span class="time">4:30 PM</span><span class="activity-text">Walk Île de la Cité, cross to the Left Bank — Latin Quarter</span><span class="tag tag-free">Free</span></li>
-    <li><span class="time">5:00 PM</span><span class="activity-text">Aaapoum Bapoum — 14 Rue Serpente, 5-min walk from Notre-Dame</span><span class="tag tag-manga">Walk-in — open until 9 PM</span></li>
-    <div class="note">One of the most famous manga &amp; comics shops in Paris. Secondhand treasures, rare finds, great prices. Rated 4.6 with nearly 900 reviews. Easy to lose an hour in here.</div>
-    <li><span class="time">6:00 PM</span><span class="activity-text">Wander the Latin Quarter — backstreets, bookshops, cafés</span><span class="tag tag-free">Free</span></li>
-    <li><span class="time">7:30 PM</span><span class="activity-text">Dinner in Le Marais or the Latin Quarter — last night in Paris, make it memorable</span></li>
-  </ul>
-</div>
-
-<!-- PARIS MAP -->
-<div class="section-label">Paris — All Stops on a Map</div>
-<div class="day-card" style="padding: 0; overflow: hidden;">
-  <div id="paris-map" style="height: 500px; border-radius: 12px;"></div>
-</div>
-<script>
-  const parisMap = L.map('paris-map');
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 20
-  }).addTo(parisMap);
-
-  const parisDayColors = {
-    "Airbnb": "#3C3489",
-    "Sun May 24": "#7B5EA7",
-    "Mon May 25": "#D4537E"
-  };
-
-  const parisPlaces = [
-    { name: "🏠 Airbnb La Garenne-Colombes", lat: 48.9048, lng: 2.2438, day: "Airbnb" },
-    { name: "Gare du Nord (Eurostar arrival)", lat: 48.8809, lng: 2.3553, day: "Sun May 24" },
-    { name: "Champs-Élysées", lat: 48.8698, lng: 2.3078, day: "Sun May 24" },
-    { name: "Arc de Triomphe / Tomb of the Unknown Soldier", lat: 48.8738, lng: 2.2950, day: "Sun May 24" },
-    { name: "Trocadéro", lat: 48.8626, lng: 2.2892, day: "Sun May 24" },
-    { name: "Eiffel Tower", lat: 48.8584, lng: 2.2945, day: "Mon May 25" },
-    { name: "Louvre Museum", lat: 48.8606, lng: 2.3376, day: "Mon May 25" },
-    { name: "Notre-Dame Cathedral", lat: 48.8530, lng: 2.3499, day: "Mon May 25" },
-    { name: "Aaapoum Bapoum (14 Rue Serpente)", lat: 48.8523, lng: 2.3442, day: "Mon May 25" },
-    { name: "Latin Quarter", lat: 48.8496, lng: 2.3460, day: "Mon May 25" }
-  ];
-
-  function makeParisIcon(color, isHome) {
-    const size = isHome ? 20 : 14;
-    const inner = isHome ? '<span style="font-size:11px;line-height:1;color:white;">★</span>' : '';
-    return L.divIcon({
-      html: `<div style="width:${size}px;height:${size}px;background:${color};border-radius:50%;border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;">${inner}</div>`,
-      className: '',
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2],
-      popupAnchor: [0, -(size / 2)]
-    });
-  }
-
-  const parisBounds = [];
-  parisPlaces.forEach(p => {
-    const color = parisDayColors[p.day];
-    const isHome = p.day === 'Airbnb';
-    const marker = L.marker([p.lat, p.lng], { icon: makeParisIcon(color, isHome) }).addTo(parisMap);
-    marker.bindPopup(`<strong style="font-size:13px;">${p.name}</strong><br><span style="font-size:11px;color:#666;">${p.day}</span>`);
-    parisBounds.push([p.lat, p.lng]);
-  });
-
-  parisMap.fitBounds(parisBounds, { padding: [28, 28] });
-
-  const parisLegend = L.control({ position: 'bottomright' });
-  parisLegend.onAdd = function () {
-    const div = L.DomUtil.create('div');
-    div.style.cssText = 'background:white;padding:8px 12px;border-radius:8px;box-shadow:0 1px 6px rgba(0,0,0,0.2);font-size:11px;font-family:"DM Sans",sans-serif;line-height:2;';
-    div.innerHTML = Object.entries(parisDayColors).map(([day, color]) =>
-      `<div style="display:flex;align-items:center;gap:7px;"><span style="display:inline-block;width:10px;height:10px;background:${color};border-radius:50%;flex-shrink:0;"></span>${day === 'Airbnb' ? '★ Airbnb' : day}</div>`
-    ).join('');
-    return div;
-  };
-  parisLegend.addTo(parisMap);
-</script>
-
-<!-- TUESDAY MAY 26 -->
-<div class="section-label">Tuesday, May 26 — Fly home</div>
-<div class="day-card">
-  <div class="day-header">
-    <span class="day-badge badge-travel">Travel</span>
-    <span class="day-title">Paris CDG → Chicago ORD</span>
-  </div>
-  <ul class="activity-list">
-    <li><span class="time">8:00 AM</span><span class="activity-text">Wake up, finish packing, check out of Airbnb</span></li>
-    <li><span class="time">8:30 AM</span><span class="activity-text">Head to CDG Airport</span><span class="tag tag-transit">Transilien L → La Défense → RER A → RER B to CDG, ~60–70 min</span></li>
-    <div class="note">Check the route on Google Maps the night before — it's a multi-step journey. Allow plenty of time.</div>
-    <li><span class="time">10:00 AM</span><span class="activity-text">Arrive CDG — check in, security, passport control</span><span class="tag tag-tip">CDG is large — allow plenty of time</span></li>
-    <li><span class="time">1:10 PM</span><span class="activity-text">DL 8756 departs CDG → ORD (Air France A350)</span></li>
-    <div class="booking-strip">Delta · CDG→ORD · Basic Economy · Carry-on only · Arrives Chicago 3:10 PM</div>
-    <li><span class="time">3:10 PM</span><span class="activity-text">🏠 Arrive Chicago O'Hare — welcome home!</span></li>
-  </ul>
-</div>
-
-<div class="note-box">
-  <strong>Manga shops this trip:</strong> London — Forbidden Planet (179 Shaftesbury Ave, Saturday ~1 PM, one of the world's largest sci-fi/anime/manga stores, walk-in). Paris — Aaapoum Bapoum (14 Rue Serpente, Monday ~5 PM, legendary secondhand manga &amp; comics shop in the Latin Quarter, 5-min walk from Notre-Dame, walk-in, open until 9 PM).
-  <br><br>
-  <strong>Baggage reminder:</strong> Both Delta flights are Basic Economy — carry-on bags only included, no free checked bags. Pack accordingly or pay the checked bag fee at check-in.
-  <br><br>
-  <strong>Paris transit tip:</strong> Buy a Navigo Easy card at Gare du Nord on arrival. Load it with individual tickets (t+ tickets) for all Metro and RER journeys — much cheaper than buying single tickets each time.
-</div>
-
-
-<style>
-  .book-section { margin-top: 32px; }
+  /* ── Bookings section ── */
   .book-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -705,111 +466,559 @@
     background: var(--tag-ticket);
     color: var(--tag-ticket-text);
   }
-  .book-cost.free {
-    background: var(--tag-free);
-    color: var(--tag-free-text);
+  .book-cost.free { background: var(--tag-free); color: var(--tag-free-text); }
+  .book-cost.done { background: var(--tag-confirm); color: var(--tag-confirm-text); }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    /* Nav */
+    .nav-header { padding: 10px 14px 0; }
+    .nav-header h1 { font-size: 17px; }
+    .nav-header .subtitle { font-size: 11px; margin-bottom: 8px; }
+    .tab-bar { padding: 0 6px; gap: 0; }
+    .tab-btn { padding: 7px 10px 9px; font-size: 11px; }
+    .tab-btn .tab-date { font-size: 9px; }
+
+    /* Layout */
+    .page-content { padding: 16px 12px 48px; }
+    .legend { gap: 8px 12px; padding: 10px 12px; }
+    .legend-item { font-size: 11px; }
+
+    /* Day card */
+    .day-card { padding: 12px 12px; border-radius: 10px; }
+    .day-title { font-size: 13px; }
+    .day-hotel { margin-left: 0; width: 100%; padding-top: 2px; }
+
+    /* Activity rows — switch to grid so tags land cleanly under activity text */
+    .activity-list li {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 0 8px;
+      align-items: start;
+      padding: 7px 0;
+    }
+    .activity-list li > .time {
+      grid-column: 1;
+      grid-row: 1;
+      font-size: 10px;
+      min-width: unset;
+      padding-top: 2px;
+    }
+    .activity-list li > .activity-text {
+      grid-column: 2;
+      grid-row: 1;
+      font-size: 12px;
+    }
+    /* Tag sits on its own row, aligned under the activity text */
+    .activity-list li > .tag {
+      grid-column: 2;
+      grid-row: 2;
+      margin-left: 0;
+      margin-top: 4px;
+      align-self: start;
+      justify-self: start;
+      white-space: normal;
+      font-size: 9px;
+      padding: 2px 7px;
+    }
+
+    /* Notes and booking strips: flush left, no indent */
+    .note { padding: 2px 0 4px 0; font-size: 10px; }
+    .booking-strip { margin: 4px 0; font-size: 10px; }
+    .note-box { padding: 12px 14px; font-size: 11px; }
+
+    /* Bookings section */
+    .book-card { padding: 14px 12px; }
+    .book-list.ranked li {
+      grid-template-columns: auto 1fr;
+      gap: 6px 10px;
+    }
+    .book-when { grid-column: 2; text-align: left; margin-top: 0; }
+    .book-rank { width: 24px; height: 24px; font-size: 11px; }
+    .book-detail { font-size: 10px; }
+    .book-list:not(.ranked) li {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .book-list:not(.ranked) .book-when { text-align: left; }
   }
-  .book-cost.done {
-    background: var(--tag-confirm);
-    color: var(--tag-confirm-text);
+
+  /* Print */
+  @media print {
+    body { background: white; }
+    .top-nav { position: static; }
+    .day-panel { display: block !important; }
+    .day-card { break-inside: avoid; }
   }
 </style>
+</head>
+<body>
 
-<div class="book-section">
-  <div class="section-label">Before You Go — Book These in Advance</div>
+<!-- ── Sticky Top Nav ── -->
+<div class="top-nav">
+  <div class="nav-inner">
+  <div class="tab-bar" role="tablist">
+    <button class="tab-btn active" onclick="showTab('tue19')" role="tab">
+      <span class="tab-date">Tue May 19</span>Departure
+    </button>
+    <button class="tab-btn" onclick="showTab('wed20')" role="tab">
+      <span class="tab-date">Wed May 20</span>Arrive London
+    </button>
+    <button class="tab-btn" onclick="showTab('thu21')" role="tab">
+      <span class="tab-date">Thu May 21</span>Tower + Concert
+    </button>
+    <button class="tab-btn" onclick="showTab('fri22')" role="tab">
+      <span class="tab-date">Fri May 22</span>Westminster
+    </button>
+    <button class="tab-btn" onclick="showTab('sat23')" role="tab">
+      <span class="tab-date">Sat May 23</span>Museums
+    </button>
+    <button class="tab-btn" onclick="showTab('sun24')" role="tab">
+      <span class="tab-date">Sun May 24</span>Eurostar
+    </button>
+    <button class="tab-btn" onclick="showTab('mon25')" role="tab">
+      <span class="tab-date">Mon May 25</span>Paris Day
+    </button>
+    <button class="tab-btn" onclick="showTab('tue26')" role="tab">
+      <span class="tab-date">Tue May 26</span>Fly Home
+    </button>
+    <button class="tab-btn" onclick="showTab('bookings')" role="tab">
+      <span class="tab-date">Planning</span>Book These
+    </button>
+    <button class="tab-btn" onclick="showTab('luggage')" role="tab">
+      <span class="tab-date">Know Before</span>Luggage
+    </button>
+  </div><!-- tab-bar -->
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">🌙</button>
+  </div><!-- nav-inner -->
+</div><!-- top-nav -->
 
-  <div class="book-card">
-    <p class="book-city ranked"><span>Ranked by Urgency</span><span class="book-city-sub">As of today (Apr 20) — trip starts in ~4 weeks</span></p>
-    <ul class="book-list ranked">
-      <li>
-        <span class="book-rank tier-1">1</span>
-        <div>
-          <div class="book-name">Eiffel Tower <span class="book-urgency tier-1">Book today</span></div>
-          <div class="book-detail">Mon May 25 · ticket.eiffeltower.paris · Summit window opened 60 days out (late March) — top-deck slots scarce now</div>
-        </div>
-        <div class="book-when"><span class="book-cost">~€29–€35</span></div>
-      </li>
-      <li>
-        <span class="book-rank tier-2">2</span>
-        <div>
-          <div class="book-name">Louvre Museum <span class="book-urgency tier-2">Book this week</span></div>
-          <div class="book-detail">Mon May 25 · ticket.louvre.fr · Popular morning slots (11:30 AM target) fill fast — essential timed entry</div>
-        </div>
-        <div class="book-when"><span class="book-cost">~€22/person</span></div>
-      </li>
-      <li>
-        <span class="book-rank tier-2">3</span>
-        <div>
-          <div class="book-name">Westminster Abbey <span class="book-urgency tier-2">Book this week</span></div>
-          <div class="book-detail">Fri May 22 · 2:45 PM slot · westminster-abbey.org · Last Friday admission is 3:30 PM — get the 2:45 slot</div>
-        </div>
-        <div class="book-when"><span class="book-cost">£31/person</span></div>
-      </li>
-      <li>
-        <span class="book-rank tier-2">4</span>
-        <div>
-          <div class="book-name">Tower of London <span class="book-urgency tier-2">Book this week</span></div>
-          <div class="book-detail">Thu May 21 · hrp.org.uk · 10 AM entry — skip-the-queue tickets save 30+ min</div>
-        </div>
-        <div class="book-when"><span class="book-cost">~£35/person</span></div>
-      </li>
-      <li>
-        <span class="book-rank tier-3">5</span>
-        <div>
-          <div class="book-name">Sky Garden <span class="book-urgency tier-3">Window opens May 1</span></div>
-          <div class="book-detail">Fri May 22 · skygarden.london · Free but 3-week advance booking only — book the moment the window opens</div>
-        </div>
-        <div class="book-when"><span class="book-cost free">Free</span></div>
-      </li>
-      <li>
-        <span class="book-rank tier-4">6</span>
-        <div>
-          <div class="book-name">British Museum <span class="book-urgency tier-4">Flexible · 1–2 wks out</span></div>
-          <div class="book-detail">Sat May 23 · britishmuseum.org · Free timed entry — slots usually available a week or two before</div>
-        </div>
-        <div class="book-when"><span class="book-cost free">Free</span></div>
-      </li>
-      <li>
-        <span class="book-rank tier-4">7</span>
-        <div>
-          <div class="book-name">HOHO Bus — 48h Ticket <span class="book-urgency tier-4">Flexible · Anytime</span></div>
-          <div class="book-detail">Fri May 22 (also valid Sat) · goldentours.com or similar · No advance booking needed — buy morning-of if you want</div>
-        </div>
-        <div class="book-when"><span class="book-cost">Buy online</span></div>
-      </li>
-      <li>
-        <span class="book-rank tier-5">8</span>
-        <div>
-          <div class="book-name">Notre-Dame Cathedral <span class="book-urgency tier-5">Last-minute only</span></div>
-          <div class="book-detail">Mon May 25 · notredame.fr · Reservations open only 2 days before — book Sat May 23</div>
-        </div>
-        <div class="book-when"><span class="book-cost free">Free</span></div>
-      </li>
-    </ul>
+<div class="page-content">
+
+  <!-- Legend (always visible) -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#D85A30;"></div>Pre-book tickets</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#639922;"></div>Free / walk-in</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#185FA5;"></div>Transit</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#5F5E5A;"></div>Tip</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#BA7517;"></div>Don't miss</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#534AB7;"></div>Confirmed booking</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#D4537E;"></div>Manga / comics</div>
   </div>
 
-  <div class="book-card">
-    <p class="book-city confirmed">Already Confirmed</p>
-    <ul class="book-list">
-      <li>
-        <div><div class="book-name">Delta Flights — ORD → LHR → ORD</div><div class="book-detail">Basic Economy · Carry-on only</div></div>
-        <div class="book-when"><span class="book-cost done">Booked</span></div>
-      </li>
-      <li>
-        <div><div class="book-name">Eurostar — London St Pancras → Paris Gare du Nord</div><div class="book-detail">Ref VXQ2X4 · Train 9018 · Coach 8 · Bryan 42 / Noah 41</div></div>
-        <div class="book-when"><span class="book-cost done">Booked</span></div>
-      </li>
-      <li>
-        <div><div class="book-name">Premier Inn London City – Aldgate</div><div class="book-detail">May 20–24</div></div>
-        <div class="book-when"><span class="book-cost done">Booked</span></div>
-      </li>
-      <li>
-        <div><div class="book-name">Airbnb — La Garenne-Colombes, Paris</div><div class="book-detail">May 24–26</div></div>
-        <div class="book-when"><span class="book-cost done">Booked</span></div>
-      </li>
-    </ul>
+  <!-- ── TUESDAY MAY 19 ── -->
+  <div id="tue19" class="day-panel active">
+    <div class="section-label">Tuesday, May 19 — Departure day</div>
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-travel">Travel</span>
+        <span class="day-title">South Bend → O'Hare → JFK → London</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">12:24 PM ET</span><span class="activity-text">Arrive South Bend Airport station — 15 min early</span><span class="tag tag-tip">Be on the platform early</span></li>
+        <li><span class="time">12:39 PM ET</span><span class="activity-text">Board westbound South Shore Line</span><span class="tag tag-transit">South Bend → Millennium Station</span></li>
+        <li><span class="time">1:43 PM CT</span><span class="activity-text">Arrive Millennium Station, Chicago</span></li>
+        <li><span class="time">1:50 PM CT</span><span class="activity-text">Walk to Washington/Dearborn Blue Line via Pedway</span><span class="tag tag-transit">~10 min underground walk</span></li>
+        <li><span class="time">2:05 PM CT</span><span class="activity-text">Board Blue Line toward O'Hare</span><span class="tag tag-transit">~45 min ride</span></li>
+        <li><span class="time">2:50 PM CT</span><span class="activity-text">Arrive O'Hare Blue Line station</span></li>
+        <li><span class="time">3:10 PM CT</span><span class="activity-text">At Terminal 5 via ATS people-mover</span><span class="tag tag-tip">T5 is the international terminal — take the ATS from any domestic terminal</span></li>
+        <li><span class="time">3:30 PM CT</span><span class="activity-text">Target: checked in and through security</span><span class="tag tag-flame">3 hrs before departure — don't cut it close</span></li>
+        <div class="note">Basic Economy — carry-on only, no free checked bags. Have passport ready for international check-in.</div>
+        <li><span class="time">6:31 PM CT</span><span class="activity-text">DL 4923 departs ORD → JFK (Endeavor / Delta Connection)</span></li>
+        <li><span class="time">~9:00 PM ET</span><span class="activity-text">Connect at JFK — 1h 40m layover</span></li>
+        <li><span class="time">~10:40 PM ET</span><span class="activity-text">DL 5988 departs JFK → LHR (Virgin Atlantic A330-900neo)</span></li>
+      </ul>
+      <div class="booking-strip">Delta · ORD→LHR · Basic Economy · Carry-on only (no free checked bags)</div>
+    </div>
   </div>
-</div>
+
+  <!-- ── WEDNESDAY MAY 20 ── -->
+  <div id="wed20" class="day-panel">
+    <div class="section-label">Wednesday, May 20 — Arrive London</div>
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-travel">Arrive</span>
+        <span class="day-title">Land at Heathrow, check in, get oriented</span>
+        <span class="day-hotel">Premier Inn Aldgate</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">12:05 PM</span><span class="activity-text">Land at London Heathrow (LHR)</span></li>
+        <div class="note">Clear UK Border Control — can take 30–60 min. Have passports and hotel address ready.</div>
+        <li><span class="time">1:30 PM</span><span class="activity-text">Elizabeth line from Heathrow toward central London</span><span class="tag tag-transit">~50 min to Liverpool St</span></li>
+        <li><span class="time">2:30 PM</span><span class="activity-text">Check in to Premier Inn London City – Aldgate, drop bags, freshen up</span></li>
+        <div class="note">If room isn't ready, hotel will hold luggage — head out and come back.</div>
+        <li><span class="time">3:30 PM</span><span class="activity-text">Easy walk around Aldgate / Whitechapel — get your bearings</span><span class="tag tag-free">Free</span></li>
+        <li><span class="time">5:00 PM</span><span class="activity-text">Short walk to Tower Bridge — first London landmark</span><span class="tag tag-free">Free</span></li>
+        <li><span class="time">7:00 PM</span><span class="activity-text">Dinner nearby — Spitalfields or Brick Lane</span></li>
+        <li><span class="time">9:00 PM</span><span class="activity-text">Early night — you've been up for 24+ hours</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── THURSDAY MAY 21 ── -->
+  <div id="thu21" class="day-panel">
+    <div class="section-label">Thursday, May 21 — Local exploring &amp; concert night</div>
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-london">London</span>
+        <span class="day-title">Tower of London, Sky Garden &amp; OVO Arena Wembley (doors 6:30 PM)</span>
+        <span class="day-hotel">Premier Inn Aldgate</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">9:30 AM</span><span class="activity-text">Breakfast near hotel — everything today is walkable from Aldgate</span></li>
+        <li><span class="time">10:00 AM</span><span class="activity-text">Tower of London — Crown Jewels, Beefeaters, medieval fortress</span><span class="tag tag-confirm">Booked ✓</span></li>
+        <div class="booking-strip">Tower of London · Thu May 21 · 10:00 AM entry · 2 adults</div>
+        <div class="note">Allow 2–2.5 hrs. One of the most visited sites in England — pre-booked, skip the queue.</div>
+        <li><span class="time">12:30 PM</span><span class="activity-text">Tower Bridge — walk across &amp; photos (5-min walk from the Tower)</span><span class="tag tag-free">Free to cross</span></li>
+        <div class="note">The Tower Bridge Exhibition (glass floor walkway) is £12/person — optional but impressive if you want it.</div>
+        <li><span class="time">1:00 PM</span><span class="activity-text">Lunch near the Tower — St Katharine Docks or Monument area</span></li>
+        <li><span class="time">2:30 PM</span><span class="activity-text">Paul A. Young Fine Chocolates — 1 Royal Exchange Buildings, EC3V 3LN</span><span class="tag tag-free">Walk-in — 5 min from the Tower</span></li>
+        <div class="note">One of London's most celebrated artisan chocolatiers, right inside the historic Royal Exchange building. Famous for inventive truffles and single-origin bars — great spot to pick up gifts or just sample something exceptional.</div>
+        <li><span class="time">3:30 PM</span><span class="activity-text">Walk back to hotel from Royal Exchange</span><span class="tag tag-transit">~15 min walk back to Aldgate</span></li>
+        <li><span class="time">4:30 PM</span><span class="activity-text">Freshen up, grab a light snack before the show</span></li>
+        <div class="note">Don't eat a big meal — grab something at Wembley instead.</div>
+        <li><span class="time">5:00 PM</span><span class="activity-text">Leave hotel — walk to Aldgate East tube</span></li>
+        <li><span class="time">5:15 PM</span><span class="activity-text">Jubilee line toward Wembley Park</span><span class="tag tag-transit">Change at Canning Town or Stratford — ~45 min</span></li>
+        <div class="note">First time on the tube — allow the extra time. Google Maps works great underground.</div>
+        <li><span class="time">6:00 PM</span><span class="activity-text">Arrive Wembley Park station — follow the crowd down Olympic Way</span></li>
+        <li><span class="time">6:15 PM</span><span class="activity-text">Arrive OVO Arena — grab food &amp; drinks before doors open</span></li>
+        <li><span class="time">6:30 PM</span><span class="activity-text">🎵 Doors open — get inside, find your seats</span></li>
+        <li><span class="time">~10:30 PM</span><span class="activity-text">Concert ends — Jubilee line back toward central London</span></li>
+        <div class="note">Platforms will be packed. Be patient, let a train or two go if needed. Back at hotel ~midnight.</div>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── FRIDAY MAY 22 ── -->
+  <div id="fri22" class="day-panel">
+    <div class="section-label">Friday, May 22 — Full sightseeing day</div>
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-london">London</span>
+        <span class="day-title">Buckingham Palace, Westminster &amp; Borough Market</span>
+        <span class="day-hotel">Premier Inn Aldgate</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">8:00 AM</span><span class="activity-text">Breakfast near hotel — early start to catch the Changing of the Guard</span></li>
+        <li><span class="time">8:45 AM</span><span class="activity-text">Tube to Green Park station</span><span class="tag tag-transit">Circle → Victoria line, ~25 min</span></li>
+        <li><span class="time">9:30 AM</span><span class="activity-text">Arrive Buckingham Palace — stake out a spot at the Victoria Memorial railings</span><span class="tag tag-free">Free</span></li>
+        <div class="note">Crowds build fast. Arrive by 9:45 AM at the latest for a clear view of the forecourt.</div>
+        <li><span class="time">10:45 AM</span><span class="activity-text">🎖️ Changing of the Guard ceremony — the full ~45 min performance</span><span class="tag tag-flame">Don't miss — check changing-guard.com to confirm date</span></li>
+        <li><span class="time">11:30 AM</span><span class="activity-text">Walk around the Palace gates &amp; Victoria Memorial — photos</span><span class="tag tag-free">Free</span></li>
+        <li><span class="time">12:00 PM</span><span class="activity-text">Stroll through St James's Park toward Westminster</span><span class="tag tag-free">~15 min walk</span></li>
+        <li><span class="time">12:15 PM</span><span class="activity-text">Jubilee line from Westminster → London Bridge</span><span class="tag tag-transit">~5 min, 2 stops</span></li>
+        <li><span class="time">12:30 PM</span><span class="activity-text">Borough Market — leisurely lunch &amp; browse the stalls</span><span class="tag tag-free">Walk-in — peak market time</span></li>
+        <div class="note">2 full hours here. Iconic London food market — eat your way through it.</div>
+        <li><span class="time">2:30 PM</span><span class="activity-text">Walk across London Bridge or tube back to Westminster</span><span class="tag tag-transit">~15 min walk over the bridge</span></li>
+        <li><span class="time">2:30 PM</span><span class="activity-text">Westminster Abbey — timed entry</span><span class="tag tag-confirm">Booked ✓</span></li>
+        <div class="booking-strip">Westminster Abbey · Fri May 22 · 2:30 PM entry · 2 adults</div>
+        <div class="note">Last admission is 3:30 PM on Fridays. Plan 1.5 hrs with the included audio guide.</div>
+        <li><span class="time">4:30 PM</span><span class="activity-text">Big Ben &amp; Houses of Parliament — exterior walk &amp; photos</span><span class="tag tag-free">Free</span></li>
+        <li><span class="time">4:45 PM</span><span class="activity-text">Board HOHO Red Route at Westminster stop</span><span class="tag tag-ticket">Buy 48h HOHO ticket online (valid Sat too)</span></li>
+        <li><span class="time">5:00 PM</span><span class="activity-text">Hop off at London Eye — photos from South Bank</span><span class="tag tag-free">Free</span></li>
+        <li><span class="time">5:30 PM</span><span class="activity-text">Hop back on HOHO or tube toward hotel — freshen up</span></li>
+        <li><span class="time">7:00 PM</span><span class="activity-text">Dinner out — nice meal before the big museum day tomorrow</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── SATURDAY MAY 23 ── -->
+  <div id="sat23" class="day-panel">
+    <div class="section-label">Saturday, May 23 — Full London sightseeing day</div>
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-london">London</span>
+        <span class="day-title">British Museum, Natural History Museum &amp; Thames cruise</span>
+        <span class="day-hotel">Premier Inn Aldgate</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">9:30 AM</span><span class="activity-text">Late start — you were out past midnight. Breakfast near hotel.</span></li>
+        <li><span class="time">10:30 AM</span><span class="activity-text">HOHO Green Route to British Museum</span><span class="tag tag-confirm">Day 2 of 48h HOHO ticket</span></li>
+        <li><span class="time">11:00 AM</span><span class="activity-text">British Museum — Rosetta Stone, Egyptian mummies, Greek antiquities</span><span class="tag tag-free">Free — timed entry recommended</span></li>
+        <div class="note">Allow 1.5–2 hrs for highlights. Could easily fill a whole day.</div>
+        <li><span class="time">1:00 PM</span><span class="activity-text">Forbidden Planet, 179 Shaftesbury Ave — comics, anime, collectibles</span><span class="tag tag-manga">~15 min walk from museum</span></li>
+        <li><span class="time">2:00 PM</span><span class="activity-text">Lunch in Covent Garden</span></li>
+        <li><span class="time">3:15 PM</span><span class="activity-text">HOHO Blue Route → Natural History Museum</span><span class="tag tag-transit">~30 min ride</span></li>
+        <li><span class="time">3:45 PM</span><span class="activity-text">Natural History Museum — dinosaurs, blue whale, Darwin Centre</span><span class="tag tag-free">Free — closes 5:50 PM</span></li>
+        <div class="note">Allow 1.5 hrs. Keep an eye on closing time.</div>
+        <li><span class="time">5:30 PM</span><span class="activity-text">HOHO Red Route back toward Westminster / South Bank</span></li>
+        <li><span class="time">6:15 PM</span><span class="activity-text">Thames River Cruise — Westminster Pier to Tower Pier</span><span class="tag tag-free">Included with 48h HOHO</span></li>
+        <div class="note">~30-min cruise. Views of St Paul's, Tate Modern, Tower Bridge. Last boat ~7 PM — don't miss it.</div>
+        <li><span class="time">7:00 PM</span><span class="activity-text">Arrive Tower Pier — 10-min walk back to hotel</span></li>
+        <li><span class="time">7:30 PM</span><span class="activity-text">Last London dinner — make it a good pub meal</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── SUNDAY MAY 24 ── -->
+  <div id="sun24" class="day-panel">
+    <div class="section-label">Sunday, May 24 — Eurostar to Paris</div>
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-travel">Travel</span>
+        <span class="day-title">Eurostar + Champs-Élysées &amp; Arc de Triomphe</span>
+        <span class="day-hotel">Airbnb La Garenne-Colombes</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">7:30 AM</span><span class="activity-text">Wake up, pack, check out of Premier Inn</span></li>
+        <li><span class="time">8:00 AM</span><span class="activity-text">Quick breakfast near hotel or grab something at St. Pancras</span></li>
+        <li><span class="time">8:20 AM</span><span class="activity-text">Tube to St. Pancras International</span><span class="tag tag-transit">Circle/Met line ~20 min — aim to arrive by 9:00</span></li>
+        <div class="note">Your ticket says arrive by 9:16 AM. Earlier is better — St. Pancras security and passport control take time.</div>
+        <li><span class="time">9:16 AM</span><span class="activity-text">Arrive St. Pancras — check in, passport control, gate</span></li>
+        <div class="booking-strip">Eurostar ref VXQ2X4 · Train 9018 · Coach 8 · Bryan seat 42 / Noah seat 41 · Departs 10:31 AM</div>
+        <li><span class="time">10:31 AM</span><span class="activity-text">Eurostar departs London St. Pancras</span></li>
+        <li><span class="time">1:59 PM</span><span class="activity-text">Arrive Paris Gare du Nord (Paris time — 1 hr ahead of London)</span></li>
+        <li><span class="time">2:15 PM</span><span class="activity-text">Transilien L from Gare Saint-Lazare or RER A → La Garenne-Colombes</span><span class="tag tag-transit">~25–35 min from Gare du Nord</span></li>
+        <div class="note">Buy a Navigo Easy card at Gare du Nord before boarding — cheapest way to top up Metro/RER tickets for the whole stay.</div>
+        <li><span class="time">3:00 PM</span><span class="activity-text">Check in to Airbnb — 2 Rue Emile Delsol, La Garenne-Colombes 92250</span><span class="tag tag-confirm">Check-in from 3:00 PM</span></li>
+        <div class="booking-strip">Airbnb · Conf# HMYQHRNETB · Host: Nathalia · +33 6 83 34 33 30 · Check-in 3:00 PM · Check-out 11:00 AM May 26 · 2 guests</div>
+        <div class="note">Drop bags, freshen up. If you arrive before 3:00 PM, host may be able to accommodate early check-in — call Nathalia at +33 6 83 34 33 30 to check.</div>
+        <li><span class="time">3:30 PM</span><span class="activity-text">Metro Line 1 to Charles-de-Gaulle–Étoile</span></li>
+        <li><span class="time">4:00 PM</span><span class="activity-text">Stroll the full Champs-Élysées toward the Arc de Triomphe</span><span class="tag tag-free">Free — ~35 min walk</span></li>
+        <li><span class="time">5:00 PM</span><span class="activity-text">Arc de Triomphe — underground pedestrian passage, view the carvings &amp; reliefs up close</span><span class="tag tag-free">Free</span></li>
+        <li><span class="time">6:15 PM</span><span class="activity-text">Get a good spot near the Tomb of the Unknown Soldier</span></li>
+        <li><span class="time">6:30 PM</span><span class="activity-text">🔥 Flame rekindling ceremony — Tomb of the Unknown Soldier</span><span class="tag tag-flame">Don't miss — daily since 1923</span></li>
+        <li><span class="time">7:15 PM</span><span class="activity-text">Dinner near Trocadéro or along the Seine — first Paris evening!</span></li>
+        <li><span class="time">~9:00 PM</span><span class="activity-text">Head back to Airbnb — Metro Line 1 from Charles de Gaulle–Étoile toward La Défense</span><span class="tag tag-transit">~20–25 min total</span></li>
+        <div class="note">From Arc de Triomphe: walk to Charles de Gaulle–Étoile station (same plaza) → Metro Line 1 direction La Défense (2 stops) → transfer to Transilien L → 1 stop to La Garenne-Colombes station → short walk to 2 Rue Emile Delsol.</div>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── MONDAY MAY 25 ── -->
+  <div id="mon25" class="day-panel">
+    <div class="section-label">Monday, May 25 — Full Paris day</div>
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-paris">Paris</span>
+        <span class="day-title">Louvre, Notre-Dame, Eiffel Tower 2nd Floor &amp; Aaapoum Bapoum</span>
+        <span class="day-hotel">Airbnb La Garenne-Colombes</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">8:00 AM</span><span class="activity-text">Breakfast near the Airbnb — croissant and coffee</span></li>
+        <li><span class="time">8:45 AM</span><span class="activity-text">Metro/RER toward central Paris — head to Louvre area</span><span class="tag tag-transit">~30 min from La Garenne-Colombes</span></li>
+        <li><span class="time">9:30 AM</span><span class="activity-text">Explore Tuileries Garden or wander along the Seine before the Louvre opens your slot</span><span class="tag tag-free">Free</span></li>
+        <li><span class="time">11:30 AM</span><span class="activity-text">Louvre Museum — Mona Lisa, Venus de Milo, Winged Victory</span><span class="tag tag-confirm">Booked ✓</span></li>
+        <div class="booking-strip">Louvre · Mon May 25 · 11:30 AM timed entry · 2 adults</div>
+        <div class="note">Allow 2–2.5 hrs for highlights. The museum is enormous — pick a focus and don't try to do everything.</div>
+        <li><span class="time">2:00 PM</span><span class="activity-text">Lunch near the Louvre — Rue de Rivoli or Tuileries garden café</span></li>
+        <li><span class="time">3:00 PM</span><span class="activity-text">Metro to Cité stop → Notre-Dame Cathedral</span><span class="tag tag-ticket">Free — reserve 2 days before (book Sat May 23)</span></li>
+        <div class="note">Allow 45 min inside. Fully restored after the 2019 fire — stunning interior.</div>
+        <li><span class="time">3:45 PM</span><span class="activity-text">RER C from Saint-Michel Notre-Dame → Champ de Mars — head to Eiffel Tower meeting point</span><span class="tag tag-transit">~10 min — do NOT go to the tower directly</span></li>
+        <li><span class="time">4:00 PM</span><span class="activity-text">Arrive meeting point: Paris Lounge, 38 Av. de la Bourdonnais — exchange GetYourGuide voucher for ticket here</span><span class="tag tag-flame">Must arrive 15 min early — latecomers turned away, no refund</span></li>
+        <li><span class="time">4:15 PM</span><span class="activity-text">🗼 Eiffel Tower — 2nd Floor Dedicated Reserved Access (1.5 hrs)</span><span class="tag tag-confirm">Booked ✓</span></li>
+        <div class="booking-strip">GetYourGuide ref GYGFWV9AXA3X · 2nd Floor access · 2 adults · Booked by Bryan Jackson · GAMBI Tours +33 7 82 50 80 08</div>
+        <div class="note">Security lines + elevator wait can add up to 25 min in high season. Cancel before 4:15 PM May 24 for 50% refund. No glass objects or sharp items allowed.</div>
+        <li><span class="time">~5:45 PM</span><span class="activity-text">Exit Eiffel Tower — Metro Line 6 or walk along the Seine toward the Latin Quarter</span><span class="tag tag-transit">~20–25 min to Latin Quarter</span></li>
+        <li><span class="time">6:30 PM</span><span class="activity-text">Aaapoum Bapoum — 14 Rue Serpente, 5-min walk from Notre-Dame</span><span class="tag tag-manga">Walk-in — open until 9 PM</span></li>
+        <div class="note">One of the most famous manga &amp; comics shops in Paris. Secondhand treasures, rare finds, great prices. Easy to lose an hour in here.</div>
+        <li><span class="time">8:00 PM</span><span class="activity-text">Dinner in Le Marais or the Latin Quarter — last night in Paris, make it memorable</span></li>
+        <li><span class="time">~10:00 PM</span><span class="activity-text">Head back to Airbnb — Metro Line 1 toward La Défense, then Transilien L</span><span class="tag tag-transit">~25–40 min depending on where you are</span></li>
+        <div class="note">From Le Marais: Metro Line 1 from Saint-Paul → La Défense (8 stops) → Transilien L → La Garenne-Colombes. From Latin Quarter: Metro Line 4 from Saint-Michel → Châtelet, transfer to Metro Line 1 → La Défense → Transilien L → La Garenne-Colombes. Check last Transilien L departure — trains run until around midnight but thin out late.</div>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── TUESDAY MAY 26 ── -->
+  <div id="tue26" class="day-panel">
+    <div class="section-label">Tuesday, May 26 — Fly home</div>
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-travel">Travel</span>
+        <span class="day-title">Paris CDG → Chicago ORD</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">8:00 AM</span><span class="activity-text">Wake up, finish packing — checkout must be by 11:00 AM</span><span class="tag tag-tip">Checkout deadline 11:00 AM</span></li>
+        <div class="note">Leave keys with Nathalia or per her instructions. Contact: +33 6 83 34 33 30. Address: 2 Rue Emile Delsol, La Garenne-Colombes 92250.</div>
+        <li><span class="time">9:00 AM</span><span class="activity-text">Check out of Airbnb — head to CDG Airport</span><span class="tag tag-transit">Transilien L → La Défense → RER A → RER B to CDG, ~60–70 min</span></li>
+        <div class="note">Check the route on Google Maps the night before — it's a multi-step journey. Allow plenty of time.</div>
+        <li><span class="time">10:00 AM</span><span class="activity-text">Arrive CDG — check in, security, passport control</span><span class="tag tag-tip">CDG is large — allow plenty of time</span></li>
+        <li><span class="time">1:10 PM</span><span class="activity-text">DL 8756 departs CDG → ORD (Air France A350)</span></li>
+        <div class="booking-strip">Delta · CDG→ORD · Basic Economy · Carry-on only · Arrives Chicago 3:10 PM</div>
+        <li><span class="time">3:10 PM</span><span class="activity-text">🏠 Arrive Chicago O'Hare — welcome home!</span></li>
+      </ul>
+    </div>
+
+    <div class="note-box">
+      <strong>Manga shops this trip:</strong> London — Forbidden Planet (179 Shaftesbury Ave, Saturday ~1 PM, one of the world's largest sci-fi/anime/manga stores, walk-in). Paris — Aaapoum Bapoum (14 Rue Serpente, Monday ~5 PM, legendary secondhand manga &amp; comics shop in the Latin Quarter, 5-min walk from Notre-Dame, walk-in, open until 9 PM).
+      <br><br>
+      <strong>Baggage reminder:</strong> Both Delta flights are Basic Economy — carry-on bags only included, no free checked bags. Pack accordingly or pay the checked bag fee at check-in.
+      <br><br>
+      <strong>Paris transit tip:</strong> Buy a Navigo Easy card at Gare du Nord on arrival. Load it with individual tickets (t+ tickets) for all Metro and RER journeys — much cheaper than buying single tickets each time.
+    </div>
+  </div>
+
+  <!-- ── BOOKINGS ── -->
+  <div id="bookings" class="day-panel">
+    <div class="section-label">Before You Go — Book These in Advance</div>
+
+    <div class="book-card">
+      <p class="book-city ranked"><span>Still To Book</span><span class="book-city-sub">Trip starts May 19 — book these ASAP</span></p>
+      <ul class="book-list ranked">
+        <li>
+          <span class="book-rank tier-4">1</span>
+          <div>
+            <div class="book-name">British Museum <span class="book-urgency tier-4">Flexible · 1–2 wks out</span></div>
+            <div class="book-detail">Sat May 23 · britishmuseum.org · Free timed entry — slots usually available a week or two before</div>
+          </div>
+          <div class="book-when"><span class="book-cost free">Free</span></div>
+        </li>
+        <li>
+          <span class="book-rank tier-4">2</span>
+          <div>
+            <div class="book-name">HOHO Bus — 48h Ticket <span class="book-urgency tier-4">Flexible · Anytime</span></div>
+            <div class="book-detail">Fri May 22 (also valid Sat) · goldentours.com or similar · No advance booking needed</div>
+          </div>
+          <div class="book-when"><span class="book-cost">Buy online</span></div>
+        </li>
+        <li>
+          <span class="book-rank tier-5">3</span>
+          <div>
+            <div class="book-name">Notre-Dame Cathedral <span class="book-urgency tier-5">Book Sat May 23</span></div>
+            <div class="book-detail">Mon May 25 · notredame.fr · Reservations open only 2 days before — book Saturday</div>
+          </div>
+          <div class="book-when"><span class="book-cost free">Free</span></div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="book-card">
+      <p class="book-city confirmed">Already Confirmed</p>
+      <ul class="book-list">
+        <li>
+          <div><div class="book-name">Delta Flights — ORD → LHR → ORD</div><div class="book-detail">Basic Economy · Carry-on only</div></div>
+          <div class="book-when"><span class="book-cost done">Booked</span></div>
+        </li>
+        <li>
+          <div><div class="book-name">Eurostar — London St Pancras → Paris Gare du Nord</div><div class="book-detail">Ref VXQ2X4 · Train 9018 · Coach 8 · Bryan 42 / Noah 41</div></div>
+          <div class="book-when"><span class="book-cost done">Booked</span></div>
+        </li>
+        <li>
+          <div><div class="book-name">Premier Inn London City – Aldgate</div><div class="book-detail">66 Alie Street, London E1 8PX · Check-in 3:00 PM May 20 · Check-out 12:00 PM May 24 · Conf# 2436617304</div></div>
+          <div class="book-when"><span class="book-cost done">Booked</span></div>
+        </li>
+        <li>
+          <div><div class="book-name">Airbnb — La Garenne-Colombes, Paris</div><div class="book-detail">2 Rue Emile Delsol, 92250 · Check-in 3:00 PM May 24 · Check-out 11:00 AM May 26 · Host Nathalia +33 6 83 34 33 30 · Code HMYQHRNETB</div></div>
+          <div class="book-when"><span class="book-cost done">Booked</span></div>
+        </li>
+        <li>
+          <div><div class="book-name">Tower of London — Thu May 21 · 10:00 AM</div><div class="book-detail">2 adults · hrp.org.uk</div></div>
+          <div class="book-when"><span class="book-cost done">Booked</span></div>
+        </li>
+        <li>
+          <div><div class="book-name">Westminster Abbey — Fri May 22 · 2:30 PM</div><div class="book-detail">2 adults · westminster-abbey.org</div></div>
+          <div class="book-when"><span class="book-cost done">Booked</span></div>
+        </li>
+        <li>
+          <div><div class="book-name">Louvre Museum — Mon May 25 · 11:30 AM</div><div class="book-detail">2 adults · ticket.louvre.fr</div></div>
+          <div class="book-when"><span class="book-cost done">Booked</span></div>
+        </li>
+        <li>
+          <div><div class="book-name">Eiffel Tower 2nd Floor — Mon May 25 · 4:15 PM</div><div class="book-detail">GetYourGuide ref GYGFWV9AXA3X · Meet at Paris Lounge, 38 Av. de la Bourdonnais · GAMBI Tours · Booked by Bryan Jackson</div></div>
+          <div class="book-when"><span class="book-cost done">Booked</span></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── LUGGAGE ── -->
+  <div id="luggage" class="day-panel">
+    <div class="section-label">Luggage — Rules &amp; Restrictions</div>
+
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-travel">Flights</span>
+        <span class="day-title">Delta Basic Economy — Both Flights</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">Carry-on</span><span class="activity-text">1 carry-on bag — overhead bin · Max <strong>22 × 14 × 9 in</strong> (56 × 35 × 23 cm) including handles and wheels</span><span class="tag tag-free">Included</span></li>
+        <li><span class="time">Personal</span><span class="activity-text">1 personal item — must fit under the seat in front · Max <strong>18 × 14 × 8 in</strong> (45 × 35 × 20 cm) · Backpack, tote, or small bag</span><span class="tag tag-free">Included</span></li>
+        <li><span class="time">Checked</span><span class="activity-text">No free checked bags on Basic Economy — checked bag fee applies if you add one at check-in</span><span class="tag tag-ticket">~$35–$75 per bag if needed</span></li>
+        <li><span class="time">Liquids</span><span class="activity-text">TSA / UK / EU rules: all liquids in containers of <strong>3.4 oz (100 ml) or less</strong>, all fitting in a single clear 1-quart zip-lock bag · One bag per person</span><span class="tag tag-tip">Goes in separate bin at security</span></li>
+      </ul>
+      <div class="booking-strip">ORD→JFK: Delta operated · JFK→LHR: Virgin Atlantic A330-900neo (Delta codeshare — Delta baggage rules apply) · CDG→ORD: Air France A350 (Delta codeshare — Delta baggage rules apply)</div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-travel">Eurostar</span>
+        <span class="day-title">London St Pancras → Paris Gare du Nord</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">Bags</span><span class="activity-text">Up to <strong>2 large bags</strong> (e.g. suitcases) + 1 small item (handbag, laptop bag) per person — no weight limit stated, but bags must be manageable on your own</span><span class="tag tag-free">No fee</span></li>
+        <li><span class="time">Size</span><span class="activity-text">Each large bag: max <strong>85 × 53 × 38 cm</strong> · Oversize items (e.g. bikes, surfboards) must be booked in advance as registered luggage</span></li>
+        <li><span class="time">Passport</span><span class="activity-text">UK → France border crossing — passports checked before boarding at St Pancras. Have them out and ready when you arrive at the terminal.</span><span class="tag tag-flame">Required — not optional</span></li>
+      </ul>
+    </div>
+
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-london">London</span>
+        <span class="day-title">Tube, Buses &amp; Getting Around</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">Tube</span><span class="activity-text">No size restrictions, but large bags are very impractical during rush hour (7–9 AM, 5–7 PM) — avoid the tube with big luggage at peak times</span><span class="tag tag-tip">Avoid peak hours with bags</span></li>
+        <li><span class="time">Elizabeth line</span><span class="activity-text">Heathrow to central London on arrival — wider doors and more space than regular tube lines, good for luggage</span><span class="tag tag-free">Navigo-equivalent: Oyster card</span></li>
+      </ul>
+    </div>
+
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-paris">Paris</span>
+        <span class="day-title">Metro, RER &amp; Transilien</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">Metro</span><span class="activity-text">No official size limits but large bags on Paris Metro are awkward — narrow doors, crowded cars, and lots of stairs with no escalators at many stations</span><span class="tag tag-tip">Pack light — it matters here</span></li>
+        <li><span class="time">RER A/B</span><span class="activity-text">More space than Metro — better option for moving between CDG, Gare du Nord, and central Paris with luggage</span></li>
+        <li><span class="time">Transilien L</span><span class="activity-text">La Garenne-Colombes ↔ La Défense — commuter rail, generally comfortable with bags during off-peak hours</span></li>
+      </ul>
+    </div>
+
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-badge badge-rest">Tips</span>
+        <span class="day-title">Packing for 7 Days Carry-On Only</span>
+      </div>
+      <ul class="activity-list">
+        <li><span class="time">Rule of 3</span><span class="activity-text">3 shirts, 3 underwear, 3 socks — mix and match, hand-wash as needed. Hotels and Airbnbs both have sinks.</span></li>
+        <li><span class="time">Shoes</span><span class="activity-text">Wear your bulkiest shoes on travel days — they take the most space in a bag. Limit to 2 pairs max.</span></li>
+        <li><span class="time">Toiletries</span><span class="activity-text">Buy full-size toiletries on arrival at a London Boots or Paris pharmacy — cheaper than TSA-compliant travel sizes and frees up bag space</span><span class="tag tag-tip">Boots is everywhere in London</span></li>
+        <li><span class="time">Souvenirs</span><span class="activity-text">Budget space or weight for souvenirs on the return — if buying books or manga at Forbidden Planet or Aaapoum Bapoum, factor that in before you leave home</span><span class="tag tag-manga">Manga shops = heavy books</span></li>
+        <li><span class="time">Personal item</span><span class="activity-text">Use your personal item (backpack) as your day bag throughout the trip — keeps your carry-on in the overhead and your daily essentials always on you</span></li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /page-content -->
+
+<script>
+  function showTab(id) {
+    document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const btns = document.querySelectorAll('.tab-btn');
+    const ids = ['tue19','wed20','thu21','fri22','sat23','sun24','mon25','tue26','bookings','luggage'];
+    btns[ids.indexOf(id)].classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setTheme(dark) {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.querySelector('.theme-toggle').textContent = dark ? '☀️' : '🌙';
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }
+
+  function toggleTheme() {
+    setTheme(document.documentElement.getAttribute('data-theme') !== 'dark');
+  }
+
+  // Init: saved preference → system preference → light
+  (function () {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(saved ? saved === 'dark' : prefersDark);
+  })();
+</script>
 
 </body>
 </html>
